@@ -38,8 +38,9 @@ function App() {
 
     ctxRef.current = ctx;
   }, [lineColor, lineOpacity, lineWidth]);
+  
 
-  // Function for starting the drawing
+  
 
   const startDrawing = (e) => {
     ctxRef.current.beginPath();
@@ -66,6 +67,23 @@ function App() {
     ctx.save();
     ctx.clearRect(0,0,canvas.width,canvas.height)
   }
+  
+ const save = () => {  
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const data = canvas.toDataURL();
+    const a = document.createElement
+    ('a');
+    a.href
+    = data;
+    a.download = 'image.png';
+    a.click();
+  }
+  const eraserfunc = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = 'destination-out';
+  }
 
   const draw = (e) => {
     if (!isDrawing) {
@@ -80,8 +98,14 @@ function App() {
 
     ctxRef.current.stroke();
   };
+ const switchTopen = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = 'source-over';
+  }
 
   return (
+   <>
     <div className="bg-gray-900 h-screen w-screen ">
       <h1 className="text-center text-5xl font-bold text-blue-800 mb-6">Drawing app </h1>
 
@@ -91,6 +115,10 @@ function App() {
           setLineWidth={setLineWidth}
           setLineOpacity={setLineOpacity}
           clearcanvas={clearcanvas}
+         switchTopen={switchTopen}
+          save={save}
+          eraserfunc={eraserfunc}
+
         />
 
         <canvas
@@ -104,6 +132,7 @@ function App() {
         />
       </div>
     </div>
+   </>
   );
 }
 
