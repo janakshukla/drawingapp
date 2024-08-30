@@ -1,68 +1,38 @@
-import React from "react";
+// src/components/Menu.js
+import React from 'react';
 
-const Menu = ({
-  setLineColor,
-  setLineWidth,
-  clearcanvas,
-  setLineOpacity,
- switchTopen,
-  save,
-  eraserfunc,
-}) => {
+const Menu = ({ setTool, setLineColor, setLineWidth, clearCanvas }) => {
   return (
-    <div className=" bg-slate-800 text-white px-12 py-5 rounded flex  gap-3 ">
-      <label>Brush Color </label>
-
+    <div className="flex items-center justify-center space-x-4 mb-6">
+      <button
+        onClick={() => setTool('pen')}
+        className="px-4 py-2 bg-blue-700 text-white rounded-md shadow hover:bg-blue-800"
+      >
+        Pen
+      </button>
+      <button
+        onClick={() => setTool('rectangle')}
+        className="px-4 py-2 bg-green-700 text-white rounded-md shadow hover:bg-green-800"
+      >
+        Rectangle
+      </button>
       <input
         type="color"
-        onChange={(e) => {
-          setLineColor(e.target.value);
-        }}
+        onChange={(e) => setLineColor(e.target.value)}
+        className="w-10 h-10 p-0 border-0 bg-gray-700"
       />
-
-      <label>Brush Width </label>
-
-      <input
-        type="range"
-        min="3"
-        max="20"
-        defaultValue={5}
-        onChange={(e) => {
-          setLineWidth(e.target.value);
-        }}
-      />
-
-      <label>Brush Opacity</label>
-
       <input
         type="range"
         min="1"
-        max="100"
-        onChange={(e) => {
-          setLineOpacity(e.target.value / 100);
-        }}
+        max="10"
+        onChange={(e) => setLineWidth(e.target.value)}
+        className="w-24"
       />
-      <button onClick={switchTopen} className="bg-slate-300 shadow-black shadow-md  text-black px-2 rounded-sm">pen</button>
       <button
-        className="bg-red-700 text-white px-4 py-2 rounded-md font-semibold"
-        onClick={clearcanvas}
+        onClick={clearCanvas}
+        className="px-4 py-2 bg-red-700 text-white rounded-md shadow hover:bg-red-800"
       >
-        {" "}
-        clear
-      </button>
-
-      <button
-        className="bg-slate-300 shadow-black shadow-md  text-black px-2 rounded-sm"
-        onClick={save}
-      >
-        export as image
-      </button>
-
-      <button
-        className="bg-slate-300 shadow-black shadow-md  text-black px-2 rounded-sm"
-        onClick={eraserfunc}
-      >
-        eraser
+        Clear
       </button>
     </div>
   );
