@@ -1,8 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
+import io from 'socket.io-client';
+
+// Assuming you're getting the boardId from URL or some other method
+const boardId = '8989';  // Replace with actual board ID logic
+const socket = io('http://localhost:3000'); // Change to your server URL
 
 export default function DrawingBoard() {
   const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false); 
   const [color, setColor] = useState('#FFFFFF');
   const [lineWidth, setLineWidth] = useState(5);
   const [tool, setTool] = useState('pencil');
@@ -16,12 +21,34 @@ export default function DrawingBoard() {
       if (ctx) {
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        // Set initial canvas background
         ctx.fillStyle = '#1F2937';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
-  }, []);
+
+    // Join the room for the specific board
+    socket.emit('join-board', { boardId });
+
+    // Listen for incoming drawing data from server
+    socket.on('drawing-data', (data) => {
+      if (data.boardId === boardId) {
+        const { shape } = data;
+        setShapes((prevShapes) => [...prevShapes, shape]);
+      }
+    });
+
+    // Listen for clear canvas event
+    socket.on('clear-canvas', (data) => {
+      if (data.boardId === boardId) {
+        clearCanvasLocal(); // Clear the canvas when another user clears it in the same board
+      }
+    });
+
+    return () => {
+      socket.off('drawing-data');
+      socket.off('clear-canvas');
+    };
+  }, [boardId]);
 
   useEffect(() => {
     drawShapes();
@@ -70,6 +97,18 @@ export default function DrawingBoard() {
           ctx.lineWidth = lineWidth;
           ctx.lineTo(x, y);
           ctx.stroke();
+
+          // Emit drawing data to server
+          socket.emit('drawing-data', {
+            boardId,
+            shape: {
+              type: tool,
+              startX: x,
+              startY: y,
+              color: tool === 'eraser' ? '#1F2937' : color,
+              lineWidth: lineWidth
+            }
+          });
         }
       } else if (currentShape) {
         setCurrentShape({
@@ -85,6 +124,9 @@ export default function DrawingBoard() {
     setIsDrawing(false);
     if (currentShape) {
       setShapes((prevShapes) => [...prevShapes, currentShape]);
+
+      // Emit shape data to server
+      socket.emit('drawing-data', { boardId, shape: currentShape });
       setCurrentShape(null);
     }
   };
@@ -106,6 +148,7 @@ export default function DrawingBoard() {
           ctx.lineWidth = shape.lineWidth;
           ctx.beginPath();
 
+          // Handle shapes (rectangle, circle, triangle, etc.)
           switch (shape.type) {
             case 'rectangle':
               ctx.rect(shape.startX, shape.startY, shape.endX - shape.startX, shape.endY - shape.startY);
@@ -140,27 +183,21 @@ export default function DrawingBoard() {
               ctx.moveTo(shape.startX, shape.startY);
               ctx.lineTo(shape.endX, shape.endY);
               break;
-            case 'pencil':
-            case 'eraser':
-              // These are handled separately in the draw function
-              break;
             default:
               break;
           }
 
           ctx.stroke();
-          if (shape.type === 'triangle') {
-            ctx.fill();
-          }
         });
       }
     }
   };
 
-  const clearCanvas = () => {
+  const clearCanvasLocal = () => {
     setShapes([]);
     setCurrentShape(null);
     const canvas = canvasRef.current;
+
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
@@ -170,9 +207,15 @@ export default function DrawingBoard() {
     }
   };
 
+  const clearCanvas = () => {
+    clearCanvasLocal(); // Clear canvas locally
+    socket.emit('clear-canvas', { boardId }); // Emit clear event to the server
+  };
+
   return (
     <div className="flex flex-col items-center space-y-4 p-4 bg-gray-900 min-h-screen">
       <div className="flex space-x-4 flex-wrap justify-center">
+        {/* Tool selection UI (Select Box) */}
         <select
           value={tool}
           onChange={(e) => setTool(e.target.value)}
@@ -186,12 +229,14 @@ export default function DrawingBoard() {
           <option value="arrow">Arrow</option>
           <option value="line">Line</option>
         </select>
+
         <input
           type="color"
           value={color}
           onChange={(e) => setColor(e.target.value)}
           className="h-10 w-10 bg-gray-800 border-none"
         />
+
         <div className="flex items-center space-x-2">
           <span className="text-white">Line Width:</span>
           <input
@@ -203,6 +248,7 @@ export default function DrawingBoard() {
             className="w-[100px]"
           />
         </div>
+
         <button
           onClick={clearCanvas}
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
@@ -214,10 +260,9 @@ export default function DrawingBoard() {
         ref={canvasRef}
         width={800}
         height={600}
-        onMouseDown={startDrawing}
+       onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
-        onMouseOut={stopDrawing}
         className="border border-gray-600 rounded"
       />
     </div>
