@@ -1,11 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useParams } from "react-router-dom";
 import io from 'socket.io-client';
 
-// Assuming you're getting the boardId from URL or some other method
-const boardId = '8989';  // Replace with actual board ID logic
-const socket = io('http://localhost:3000'); // Change to your server URL
+
+const socket = io('http://localhost:3000');
 
 export default function DrawingBoard() {
+  //i want to get board id as a string
+  const boardId= useParams().BoardId
+   
+ 
+  
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false); 
   const [color, setColor] = useState('#FFFFFF');
@@ -212,6 +217,20 @@ export default function DrawingBoard() {
     socket.emit('clear-canvas', { boardId }); // Emit clear event to the server
   };
 
+  const saveImage = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const link = document.createElement('a');
+      link.download = `drawing-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  }
+  const copyUrl = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+  }
+
   return (
     <div className="flex flex-col items-center space-y-4 p-4 bg-gray-900 min-h-screen">
       <div className="flex space-x-4 flex-wrap justify-center">
@@ -254,6 +273,16 @@ export default function DrawingBoard() {
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
         >
           Clear Canvas
+        </button>
+        <button
+          onClick={copyUrl}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800 transition-colors"
+        > Copy URL
+        </button>
+        <button
+          onClick={saveImage}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition-colors"
+        >Save Image
         </button>
       </div>
       <canvas

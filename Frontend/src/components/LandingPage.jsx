@@ -2,9 +2,12 @@ import React from 'react'
 import { Pencil, Users, Share2, Layers } from 'lucide-react'
 import { Link } from "react-router-dom";
 import { Button } from './ui/button'
-import { Input } from './ui/input'
+
 
 const LandingPage = () => {
+
+    const BoardId = parseInt(Math.random()*10000000)
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <header className="px-4 lg:px-6 h-14 flex items-center justify-between">
@@ -13,8 +16,7 @@ const LandingPage = () => {
           <span className="ml-2 text-lg font-bold">FunDraw</span>
         </a>
         <div className="flex gap-4">
-          <Button variant="outline" className="text-white border-white hover:bg-gray-800">Login</Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">Sign Up</Button>
+         
         </div>
       </header>
       <main className="flex-1">
@@ -30,7 +32,7 @@ const LandingPage = () => {
                 </p>
               </div>
               <div className="space-x-4">
-                <Link to={"/drawing"}>
+                <Link to={`/drawing/${BoardId}`}>
                 <Button className="bg-blue-600 hover:bg-blue-700">Get Started</Button>
                 </Link>
               </div>
@@ -86,13 +88,7 @@ const LandingPage = () => {
                 </p>
               </div>
               <div className="w-full max-w-sm space-y-2">
-                <form className="flex space-x-2">
-                  <Input className="max-w-lg flex-1 bg-gray-800 border-gray-700 text-white" placeholder="Enter your email" type="email" />
-                  <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Sign Up</Button>
-                </form>
-                <p className="text-xs text-gray-400">
-                  By signing up, you agree to our Terms & Conditions.
-                </p>
+               
               </div>
             </div>
           </div>
@@ -100,7 +96,7 @@ const LandingPage = () => {
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-gray-800">
         <p className="text-xs text-gray-400">
-          © 2023 DrawTogether Inc. All rights reserved.
+          © 2023 FunDraw Inc. All rights reserved.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <a href="#" className="text-xs hover:underline underline-offset-4 text-gray-400">
