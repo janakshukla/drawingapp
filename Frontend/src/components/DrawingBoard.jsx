@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import io from 'socket.io-client';
 
 
-const socket = io('http://localhost:3000');
+const socket = io('https://drawingapp-nkk9.onrender.com'|| 'http://localhost:3000');
 
 export default function DrawingBoard() {
   //i want to get board id as a string
